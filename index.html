@@ -124,6 +124,9 @@
       var outputContainer = document.getElementById("output");
       var outputMessage = document.getElementById("outputMessage");
       var outputData = document.getElementById("outputData");
+      //test data
+      var vendohotspotip="10.0.0.1";
+      var vendopath="status";
       // auto loggin for chap users
       function doLogin(usrName, pssWord){
         document.sendin.username.value = usrName;
@@ -131,6 +134,27 @@
         document.sendin.submit();
         return false;
       }
+      function getUrlVars() {
+          var vars = {};
+          var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+              vars[key] = value;
+          });
+          return vars;
+      }
+      function getUrlParam(parameter, defaultvalue){
+          var urlparameter = defaultvalue;
+          if(window.location.href.indexOf(parameter) > -1){
+              urlparameter = getUrlVars()[parameter];
+              }
+          return urlparameter;
+      }
+      function func_check_url_param()
+      {
+        vendohotspotip = getUrlParam('hotspotip','0');
+        vendopath = getUrlParam('path','0');
+      }
+      
+
 
       function drawLine(begin, end, color) {
         canvas.beginPath();
@@ -205,9 +229,19 @@
             // regex for chap users min user & pass n is 3
             var chapMatcher = /^(https?:\/\/)?[a-zA-Z0-9]{7}&username=[a-zA-Z0-9][a-zA-Z0-9]{2,16}&password=[a-zA-Z0-9][a-zA-Z0-9]{2,16}$/gm;
             var papMatcherIP = /^(http\:\/\/)?[a-z0-9_\.-]{1,20}\/login\?qr=[0-9]{1,2}&vendoip=[0-9\.]{2,16}$/g;
+            var papMatcherVendoIP = /^vendoip=[0-9\.]{2,16}$/gm;
             var papMatched = papMatcher.test(code.data);
             var chapMatched = chapMatcher.test(code.data);
             var chapMatchedIP = papMatcherIP.test(code.data);
+            var chapMatchedVendoIP = papMatcherVendoIP.test(code.data);
+            func_check_url_param();
+            if(chapMatchedVendoIP == true)
+            {
+              var httptext = "http://";
+              var url_final =httptext.concat(vendohotspotip,"/",vendopath,"?qr=1&",code.data);
+              window.location = url_final; // start login for pap works in http-pap only
+            }
+
             // if (papMatched == true) {
             if(chapMatchedIP == true) {
               window.location = code.data; // start login for pap works in http-pap only
